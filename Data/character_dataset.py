@@ -8,11 +8,21 @@ num_candidates = 19
 history_threshold = 5
 
 datasets = {'train': [], 'valid': [], 'test':[]}
-with open("Sequential Utterances/s1_utterances.txt") as f:
-    corpus = [line.rstrip() for line in f]
 
-json_file = open("Dataset/s1_dataset.json","r")
-scene_ids = json.load(json_file)
+corpus = []
+scene_ids = {}
+files = ['season_01', 'season_02', 'season_03', 'season_04', 'season_05', 'season_06', 'season_07', 'season_08', 'season_09', 'season_10']
+
+for file in files:
+	f = open("Sequence_Utterences/" + file + ".txt")
+	file_corpus = [line.rstrip() for line in f]
+	corpus += file_corpus
+	json_file = open("Dataset/"  + file + ".json","r")
+	scene_ids.update(json.load(json_file))
+
+
+# json_file = open("Dataset/s1_dataset.json","r")
+# scene_ids = json.load(json_file)
 
 for scene_id in scene_ids:
 	print(scene_id)
@@ -42,8 +52,7 @@ for scene_id in scene_ids:
 		history_speakers.append(speaker)
 
 
-
-with open('ross_s1.json', 'w') as fp:
+with open('ross.json', 'w') as fp:
     json.dump(datasets, fp)
 
 
