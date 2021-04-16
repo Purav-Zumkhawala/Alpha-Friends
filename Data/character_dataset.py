@@ -1,5 +1,6 @@
 import random
 import json
+import collections
 
 main_character = 'Ross Geller'
 dialogue_threshold = 2
@@ -23,9 +24,10 @@ for file in files:
 
 # json_file = open("Dataset/s1_dataset.json","r")
 # scene_ids = json.load(json_file)
+length = collections.defaultdict(int)
 
 for scene_id in scene_ids:
-	print(scene_id)
+	# print(scene_id)
 	if scene_ids[scene_id]['count'][main_character] < dialogue_threshold:
 		continue
 
@@ -35,6 +37,10 @@ for scene_id in scene_ids:
 
 	for speaker, dialogue in scene_ids[scene_id]['dialogues']:
 		if len(history)> history_threshold and speaker == main_character:
+			length[len(dialogue.split())] += 1
+			if len(dialogue.split()) < 5 or len(dialogue.split()) > 18:
+				continue
+
 			candidates = []
 			candidates = random.sample(corpus, num_candidates)
 
@@ -42,17 +48,30 @@ for scene_id in scene_ids:
 				candidates = random.sample(corpus, num_candidates)
 
 			candidates.append(dialogue)
+			print("---")
+			if len(history_speakers) > 1:
+				print(history[-2])
+				print(history[-1])
+			print(dialogue)
+			print("---")
+
 
 			utterances = {"candidates": candidates, "history": history, "history_speakers" : history_speakers}
 			sample = {"utterances": utterances}
-			print(sample)
+			# print(sample)
 			datasets[id].append(sample)
 
 		history.append(dialogue)
 		history_speakers.append(speaker)
 
+print("train ", len(datasets['train']))
+print("test ", len(datasets['test']))
+print("valid ", len(datasets['valid']))
+# print("length ", length)
 
-with open('ross.json', 'w') as fp:
+for l in sorted(length):
+	print(l,"->",length[l])
+with open(main_character + '.json', 'w') as fp:
     json.dump(datasets, fp)
 
 
