@@ -3,7 +3,7 @@ import json
 import collections
 
 main_character = 'Ross Geller'
-dialogue_threshold = 2
+dialogue_threshold = 0
 word_threshold = 5
 num_candidates = 19
 history_threshold = 5
@@ -22,12 +22,31 @@ for file in files:
 	scene_ids.update(json.load(json_file))
 
 
-# json_file = open("Dataset/s1_dataset.json","r")
-# scene_ids = json.load(json_file)
 length = collections.defaultdict(int)
+file_all_speakers = open("script_all_speakers_dialogue.txt","w")
+file_all_speakers_per_scene = open("script_all_speakers_dialogue_per_scene.txt","w")
+
+file_mg = open("script_mg_all_dialogue.txt","w")
+file_mg_per_scene = open("script_mg_all_dialogue_per_scene.txt","w")
 
 for scene_id in scene_ids:
-	# print(scene_id)
+	for speaker, dialogue in scene_ids[scene_id]['dialogues']:
+		file_all_speakers.write(speaker+": "+dialogue+"\n")
+		file_all_speakers_per_scene.write(speaker+": "+dialogue)
+		if speaker == "Monica Geller":
+			speaker_bos = "<" + speaker + ">"
+			speaker_eos = "<\\" + speaker + ">"
+			file_mg.write(speaker_bos+": "+dialogue+speaker_eos+"\n")
+			file_mg_per_scene.write(speaker_bos+": "+dialogue+speaker_eos)
+		else:
+			file_mg.write(dialogue+"\n")
+			file_mg_per_scene.write(dialogue)
+	file_all_speakers_per_scene.write("\n")
+	file_mg_per_scene.write("\n")
+file_all_speakers.close()
+
+
+for scene_id in scene_ids:
 	if scene_ids[scene_id]['count'][main_character] < dialogue_threshold:
 		continue
 
@@ -37,7 +56,6 @@ for scene_id in scene_ids:
 
 	for speaker, dialogue in scene_ids[scene_id]['dialogues']:
 		if len(history)> history_threshold and speaker == main_character:
-			length[len(dialogue.split())] += 1
 			if len(dialogue.split()) < 5 or len(dialogue.split()) > 18:
 				continue
 
@@ -61,6 +79,8 @@ for scene_id in scene_ids:
 			# print(sample)
 			datasets[id].append(sample)
 
+		length[len(dialogue.split())] += 1
+		# print(speaker,": ", dialogue)
 		history.append(dialogue)
 		history_speakers.append(speaker)
 
